@@ -1,12 +1,47 @@
-version: '3.8'
 services:
-  app:
-    build: .
-    devices:
-      - "/dev/hailo0:/dev/hailo0"
-    ports:
-      - "5000:5000"
+  db:
+    container_name: db  # Force the container name to "db"
+    image: mysql:latest
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: telkomiot123  # Root password
+      MYSQL_DATABASE: AI_Vehicle  # Database name
     volumes:
-      - /usr/lib/python3/dist-packages/hailo_platform:/usr/lib/python3/dist-packages/hailo_platform
-    working_dir: /app
-    command: ["python", "pepe.py"]
+      - ./mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+
+  phpmyadmin:
+    container_name: phpmyadmin  # Force the container name
+    image: arm64v8/phpmyadmin
+    restart: always
+    depends_on:
+      - db
+    environment:
+      PMA_HOST: db
+      MYSQL_ROOT_PASSWORD: telkomiot123
+    ports:
+      - "8080:80"
+
+  vehiclecounting:
+    container_name: vehiclecounting_service
+    image: testing:1.3 # Use the built image
+    devices:
+      - "/dev/hailo0:/dev/hailo0"  # If you need access to Hailo device
+    environment:
+      - PYTHONUNBUFFERED=1  # Ensure real-time logs
+      - DB_HOST=db  # Use 'db' service name instead of localhost
+      - DB_USER=root
+      - DB_PASSWORD=telkomiot123
+      - DB_NAME=AI_Vehicle
+    restart: always
+    tty: true  # Keep container running
+    depends_on:
+      - db  # Ensure the database starts first
+    ports:
+      - "5000:5000"  # Expose the service on port 5000
+      - "5001:5001"  # Expose the service on port 5001
+    command: ["python3", "/vehicleCounting/main.py"]  # Auto-run main.py
+
+
+      # docker exec -it vehiclecounting_service bash

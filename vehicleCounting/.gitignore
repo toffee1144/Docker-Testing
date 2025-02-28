@@ -1,0 +1,4 @@
+*.log
+testing/
+__pycache__/
+*.ts
