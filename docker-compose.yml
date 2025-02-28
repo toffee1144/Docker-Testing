@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  app:
+    build: .
+    devices:
+      - "/dev/hailo0:/dev/hailo0"
+    ports:
+      - "5000:5000"
+    volumes:
+      - /usr/lib/python3/dist-packages/hailo_platform:/usr/lib/python3/dist-packages/hailo_platform
+    working_dir: /app
+    command: ["python", "pepe.py"]

@@ -1,0 +1,6 @@
+Flask
+opencv-python
+psutil
+pytz
+mysql-connector-python
+paho-mqtt
